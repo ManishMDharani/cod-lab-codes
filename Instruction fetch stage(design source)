@@ -1,0 +1,51 @@
+
+module instruction_fetch #(
+    parameter ADDR_WIDTH = 8,
+    parameter RESET_PC   = 32'h00000000
+)(
+    input  logic        clk,
+    input  logic        reset,
+    input  logic        stall,
+    input  logic        redirect_valid,
+    input  logic [31:0] redirect_pc,
+
+    output logic [31:0] pc_out,
+    output logic [31:0] instruction
+);
+    logic [31:0] imem [0:(1<<ADDR_WIDTH)-1];
+    logic [31:0] pc_next;
+    logic [31:0] pc_plus4;
+    integer i;
+
+    initial begin
+        for (i = 0; i < (1<<ADDR_WIDTH); i = i + 1)
+        imem[i] = 32'h00000013;
+        imem[0] = 32'h00500093; // ADDI x1, x0, 5
+        imem[1] = 32'h00A00113; // ADDI x2, x0, 10
+        imem[2] = 32'h002081B3; // ADD  x3, x1, x2
+        imem[3] = 32'h00302023; // SW   x3, 0(x0)
+        imem[4] = 32'h00000013; // NOP
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset)
+            pc_out <= RESET_PC;
+
+        else if (redirect_valid)
+            pc_out <= redirect_pc;
+
+        else if (!stall)
+            pc_out <= pc_plus4;
+    end
+    assign pc_plus4 = pc_out + 32'd4;
+    always_comb begin
+        pc_next = pc_plus4;
+
+        if (redirect_valid)
+            pc_next = redirect_pc;
+    end
+    
+    always_comb begin
+        instruction = imem[pc_out[ADDR_WIDTH+1:2]];
+    end
+  endmodule

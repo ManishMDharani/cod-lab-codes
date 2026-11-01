@@ -1,0 +1,101 @@
+module main_control_unit (
+    input  logic [6:0] opcode,
+
+    output logic [1:0] memtoreg,
+    output logic       branch,
+    output logic       memread,
+    output logic       memwrite,
+    output logic       alusrc,
+    output logic       regwrite,
+    output logic [2:0] aluop,
+    output logic       mux_inp
+);
+
+    always_comb begin
+        memtoreg = 2'b00;
+        branch   = 1'b0;
+        memread  = 1'b0;
+        memwrite = 1'b0;
+        alusrc   = 1'b0;
+        regwrite = 1'b0;
+        aluop    = 3'b000;
+        mux_inp  = 1'b0;
+
+        case (opcode)
+
+            // R-Type
+            7'b0110011: begin
+                memtoreg = 2'b00;
+                alusrc   = 1'b0;
+                regwrite = 1'b1;
+                aluop    = 3'b000;
+            end
+
+            // I-Type ALU
+            7'b0010011: begin
+                memtoreg = 2'b00;
+                alusrc   = 1'b1;
+                regwrite = 1'b1;
+                aluop    = 3'b001;
+            end
+
+            // lw
+            7'b0000011: begin
+                memtoreg = 2'b01;
+                memread  = 1'b1;
+                alusrc   = 1'b1;
+                regwrite = 1'b1;
+                aluop    = 3'b010;
+            end
+
+            // sw
+            7'b0100011: begin
+                memtoreg = 2'b00;
+                memwrite = 1'b1;
+                alusrc   = 1'b1;
+                aluop    = 3'b011;
+            end
+
+            // BEQ
+            7'b1100011: begin
+                memtoreg = 2'b00;
+                branch   = 1'b1;
+                alusrc   = 1'b0;
+                aluop    = 3'b100;
+            end
+
+            // jal
+            7'b1101111: begin
+                memtoreg = 2'b10;
+                regwrite = 1'b1;
+                aluop    = 3'b001;
+            end
+
+            // jalr
+            7'b1100111: begin
+                memtoreg = 2'b10;
+                alusrc   = 1'b1;
+                regwrite = 1'b1;
+                aluop    = 3'b001;
+                mux_inp  = 1'b1;
+            end
+
+            // lui
+            7'b0110111: begin
+                memtoreg = 2'b00;
+                regwrite = 1'b1;
+                aluop    = 3'b110;
+            end
+
+            // AUIPC
+            7'b0010111: begin
+                memtoreg = 2'b00;
+                regwrite = 1'b1;
+                aluop    = 3'b000;
+            end
+
+            default: begin
+            end
+        endcase
+    end
+endmodule

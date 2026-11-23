@@ -1,0 +1,14 @@
+module single_cycle_riscv (
+    input  logic        clk,
+    input  logic        reset,
+    input  logic        stall,
+    input  logic [31:0] instruction,   // from instruction memory (addressed by `address`)
+    input  logic [31:0] mem_out,       // from data memory
+    output logic [31:0] rs2_data,      // store data
+    output logic [31:0] alu_out,       // data memory address
+    output logic        mem_write,
+    output logic        mem_read,
+    output logic [2:0]  fn3,           // load / store width
+    output logic [6:0]  opcode,
+    output logic [31:0] address        // PC
+);

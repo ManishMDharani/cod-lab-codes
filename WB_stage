@@ -1,0 +1,10 @@
+module wb_stage(
+    input  logic [31:0] mem_out,           // data from data memory
+    input  logic [31:0] alu_out,
+    input  logic [31:0] return_addr,       // PC + 4
+    input  logic [31:0] imm_out,           // LUI immediate
+    input  logic [31:0] pc_signed_offset,  // PC + upper immediate (AUIPC)
+    input  logic [1:0]  memtoreg,
+    input  logic [6:0]  opcode_out_d,
+    output logic [31:0] wb_data
+);
